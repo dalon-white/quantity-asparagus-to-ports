@@ -36,14 +36,14 @@ asp_dat <- asp_dat |>
 # View the first few rows with the new column
 head(asp_dat |> select(CBP.Entry...Entry.Date, entry_year))
 
-asp_imports_summ_port_year <- asp_dat |> group_by(entry_year, CBP.Entry...Port.of.Entry.Code, CBP.Entry...Port.of.Entry.Name) |> summarise(
+asp_imports_summ_port_year <- asp_dat |> group_by(entry_year, CBP.Entry...Port.of.Entry.Code, CBP.Entry...Port.of.Entry.Name, CBP.Line...Country.of.Origin) |> summarise(
     total_quantity = sum(PG26...Net.Quantity, na.rm = TRUE)
 ) |> ungroup() |> arrange(desc(total_quantity))
 
-view(asp_imports_summ)
+#view(asp_imports_summ)
 
 # summarize over years too
-asp_imports_summ_port <- asp_dat |> group_by(CBP.Entry...Port.of.Entry.Code, CBP.Entry...Port.of.Entry.Name) |> summarise(
+asp_imports_summ_port <- asp_dat |> group_by(CBP.Entry...Port.of.Entry.Code, CBP.Entry...Port.of.Entry.Name, CBP.Line...Country.of.Origin) |> summarise(
     total_quantity = sum(PG26...Net.Quantity, na.rm = TRUE)
 ) |> ungroup() |> arrange(desc(total_quantity))
 
