@@ -1,0 +1,55 @@
+---
+
+---
+ACE message set:
+header+01+02P+05+17
+    Filter to AP0600
+    Filter to HTS codes
+match PG26 for quantity
+
+```{r}
+pacman::p_load(tidyverse)
+```
+
+
+#Downloaded the data from SQL-SMS
+```{r}
+
+asp_dat <- read.csv("C:/Users/Dalon.White/OneDrive - USDA/Desktop/Projects/Data pull/asparagus data 08_21_25.csv",stringsAsFactors = FALSE)
+
+# asp_dat |> count(PG05...Scientific.Species.Name) |> arrange(desc(n))
+
+# asp_dat |> count(PG05...Scientific.Genus.Name) |> arrange(desc(n))
+
+asp_dat <- asp_dat |> 
+filter(grepl("Asparag", PG05...Scientific.Species.Name, ignore.case = TRUE) | grepl("Asparag", PG05...Scientific.Genus.Name, ignore.case = TRUE))
+
+nrow(asp_dat)
+
+asp_dat |> count(PG26...Unit.of.Measure) |> 
+  arrange(desc(n))
+asp_dat <- asp_dat |> 
+  filter(PG26...Unit.of.Measure == "KG")
+asp_dat <- asp_dat |> 
+  mutate(entry_year = lubridate::year(as.Date(CBP.Entry...Entry.Date)))
+
+# View the first few rows with the new column
+head(asp_dat |> select(CBP.Entry...Entry.Date, entry_year))
+
+asp_imports_summ_port_year <- asp_dat |> group_by(entry_year, CBP.Entry...Port.of.Entry.Code, CBP.Entry...Port.of.Entry.Name) |> summarise(
+    total_quantity = sum(PG26...Net.Quantity, na.rm = TRUE)
+) |> ungroup() |> arrange(desc(total_quantity))
+
+view(asp_imports_summ)
+
+# summarize over years too
+asp_imports_summ_port <- asp_dat |> group_by(CBP.Entry...Port.of.Entry.Code, CBP.Entry...Port.of.Entry.Name) |> summarise(
+    total_quantity = sum(PG26...Net.Quantity, na.rm = TRUE)
+) |> ungroup() |> arrange(desc(total_quantity))
+
+
+
+setwd("C:/Users/Dalon.White/OneDrive - USDA/Desktop/Projects/quantity-asparagus-to-ports")
+write.csv(asp_imports_summ_port_year, "asp_imports_summ_port_year.csv", row.names = FALSE)
+write.csv(asp_imports_summ_port, "asp_imports_summ_port.csv", row.names = FALSE)
+```
